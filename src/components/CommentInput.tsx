@@ -1,5 +1,4 @@
 import { useState } from "react";
-import styles from "../styles/CommentInput.module.css";
 
 type Props = {
   position: { x: number; y: number };
@@ -17,16 +16,16 @@ export default function CommentBox({ position, innerRef, submit }: Props) {
   return (
     <div ref={innerRef}>
       <div
-        className={styles.container}
+        className='flex flex-col fixed m-2 p-2 rounded-md bg-slate-300 border-slate-300 border-1'
         style={{ top: position.y, left: position.x }}
       >
         <div>Please input your comment</div>
         <textarea
-          className={styles.text}
+          className='relative h-40 w-96 m-3'
           value={text}
           onChange={handleInput}
         ></textarea>
-        <button onClick={() => submit(text)} className={styles.button}>
+        <button onClick={() => submit(text)}>
           Submit
         </button>
       </div>

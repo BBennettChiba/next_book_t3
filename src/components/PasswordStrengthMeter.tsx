@@ -1,4 +1,3 @@
-import styles from "../styles/PasswordStrengthMeter.module.css";
 import zxcvbn from "zxcvbn";
 export default function PasswordStrengthMeter({ password }: { password: any }) {
   const evaluation = zxcvbn(password);
@@ -16,8 +15,8 @@ export default function PasswordStrengthMeter({ password }: { password: any }) {
     };
   }
   return (
-    <div className={styles.progress}>
-      <div className={styles.progressBar} style={changeProgressBar()}></div>
+    <div className='bg-slate-300 w-full h-5'>
+      <div className='h-full duration-300' style={changeProgressBar()}></div>
       <div className="feedback">
         <div className="warning">{evaluation.feedback.warning}</div>
         {evaluation.feedback.suggestions.map((suggestion, i) => (
