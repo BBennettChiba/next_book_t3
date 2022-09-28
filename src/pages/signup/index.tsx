@@ -2,17 +2,48 @@ import { useState } from "react";
 import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
 import { useRouter } from "next/router";
 import { trpc } from "../../utils/trpc";
+import { string } from "zod";
+
+type Keys = "name" | "password" | "confirmPassword" | "email" | "confirmEmail";
+
+type UserInfo = { [k in Keys]: string };
+
+type Errors = {
+  [k in keyof UserInfo as `${k}Error`]: string[] | null;
+};
 
 export default function Login() {
-  const [userInfo, setUserInfo] = useState({
+  const [userInfo, setUserInfo] = useState<UserInfo>({
     name: "",
     password: "",
     confirmPassword: "",
     email: "",
     confirmEmail: "",
   });
+  const [errors, setErrors] = useState<Errors>({
+    emailError: null,
+    confirmEmailError: null,
+    confirmPasswordError: null,
+    passwordError: null,
+    nameError: null,
+  });
 
-  const createUserMutation = trpc.useMutation("user.create-user");
+  const createUserMutation = trpc.useMutation("user.create-user", {
+    onError: (error) => {
+      if (error?.data?.zodError?.fieldErrors) {
+        const fieldErrors = error.data.zodError.fieldErrors as {
+          [K in Keys]?: string[];
+        };
+        let newErrors = { ...errors };
+        for (const field in fieldErrors) {
+          newErrors[`${field as Keys}Error`] =
+            fieldErrors[field as Keys] || null;
+        }
+        setErrors(newErrors);
+        createUserMutation.reset();
+      }
+    },
+  });
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -20,75 +51,94 @@ export default function Login() {
     createUserMutation.mutate(userInfo);
   };
 
-  const label = "font-bold mt-4 flex justify-between";
-  const input = "p-2 border rounded-md  h-1/2 mt-auto mb-auto";
-
   return (
-    <div className="ml-[30vw] mr-[30vw]">
-      signup
-      <form className="flex flex-col" onSubmit={handleSubmit}>
-        <label className={label}>
-          <h3>Username </h3>
+    <div className="bg-grey-lighter min-h-screen flex flex-col">
+      <form
+        onSubmit={handleSubmit}
+        className="container max-w-sm mx-auto flex flex-1 flex-col items-center justify-center px-2"
+      >
+        <div className="bg-white px-6 py-8 rounded shadow-md text-black w-full">
+          <h1 className="mb-8 text-3xl text-center">Sign up</h1>
           <input
-            className={input}
-            required
             type="text"
+            name="username"
+            placeholder="username"
             id="username"
-            onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
-          />
-        </label>
-        <label className={label}>
-          <h3> Password </h3>
-          <input
-            className={input}
             required
+            className="block border border-grey-light w-full p-3 rounded mb-4"
+            onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+          ></input>
+          {errors.nameError && <div>{JSON.stringify(errors.nameError)}</div>}
+          <input
             type="password"
+            name="password"
+            placeholder="password"
             id="password"
+            required
+            className="block border border-grey-light w-full p-3 rounded mb-4"
             onChange={(e) =>
               setUserInfo({ ...userInfo, password: e.target.value })
             }
-          />
-        </label>
-        <label className={label}>
-          <h3> Confirm password</h3>
+          ></input>
+          {errors.passwordError && (
+            <div>{JSON.stringify(errors.passwordError)}</div>
+          )}
           <input
-            required
-            className={input}
             type="password"
+            name="confirmPassword"
+            placeholder="confirm password"
             id="confirmPassword"
+            required
+            className="block border border-grey-light w-full p-3 rounded mb-4"
             onChange={(e) =>
               setUserInfo({ ...userInfo, confirmPassword: e.target.value })
             }
-          />
-        </label>
-        <label className={label}>
-          <h3>Email</h3>
+          ></input>
+          {errors.confirmPasswordError && (
+            <div>{JSON.stringify(errors.confirmPasswordError)}</div>
+          )}
           <input
-            className={input}
-            required
-            type="email"
+            type="text"
+            name="email"
+            placeholder="email"
             id="email"
+            required
+            className="block border border-grey-light w-full p-3 rounded mb-4"
             onChange={(e) =>
               setUserInfo({ ...userInfo, email: e.target.value })
             }
-          />
-        </label>
-        <label className={label}>
-          <h3>Confirm Email</h3>
+          ></input>
+          {errors.emailError && <div>{JSON.stringify(errors.emailError)}</div>}
           <input
-            className={input}
-            required
-            type="email"
+            type="text"
+            name="confirmEmail"
+            placeholder="confirm email"
             id="confirmEmail"
+            required
+            className="block border border-grey-light w-full p-3 rounded mb-4"
             onChange={(e) =>
               setUserInfo({ ...userInfo, confirmEmail: e.target.value })
             }
-          />
-        </label>
+          ></input>
+          {errors.confirmEmailError && (
+            <div>{JSON.stringify(errors.confirmEmailError)}</div>
+          )}
+          <button
+            type="submit"
+            className="w-full text-center py-3 rounded bg-green-500 text-white hover:bg-green-dark focus:outline-none my-1"
+          >
+            Create Account
+          </button>
+        </div>
 
-        <input value="submit" type="submit" />
+        <PasswordStrengthMeter password={userInfo.password} />
       </form>
-      <PasswordStrengthMeter password={userInfo.password} />
     </div>
   );
 }
+
+
+/**
+ * @TODO add shake effect on errors
+ * @TODO add popup messages explaining error
+ */
