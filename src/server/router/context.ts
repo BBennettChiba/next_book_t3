@@ -1,4 +1,5 @@
 // src/server/router/context.ts
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
 import { unstable_getServerSession as getServerSession } from "next-auth";
@@ -28,6 +29,19 @@ type Context = trpc.inferAsyncReturnType<typeof createContext>;
 
 export const createRouter = () =>
   trpc.router<Context>().formatError(({ shape, error }) => {
+    if (
+      error.cause instanceof PrismaClientKnownRequestError &&
+      error.cause.code === "P2002"
+    ) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          prismaError: "problem",
+          zodError: null
+        },
+      };
+    }
     return {
       ...shape,
       data: {
