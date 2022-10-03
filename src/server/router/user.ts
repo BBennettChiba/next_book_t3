@@ -12,14 +12,22 @@ export const userRouter = createRouter().mutation("create-user", {
       name: z.string().min(3),
     })
     .strict()
-    .refine(({ email, confirmEmail }) => email === confirmEmail, {
-      message: "Email and confirm email must match",
-      path: ["confirmEmail"],
-    })
-    .refine(({ password, confirmPassword }) => password === confirmPassword, {
-      message: "Passwords must match",
-      path: ["password"],
-    }),
+    .refine(
+      ({ email, confirmEmail }) =>
+        email.toLowerCase() === confirmEmail.toLowerCase(),
+      {
+        message: "Email and confirm email must match",
+        path: ["confirmEmail"],
+      }
+    )
+    .refine(
+      ({ password, confirmPassword }) =>
+        password.toLowerCase() === confirmPassword.toLowerCase(),
+      {
+        message: "Passwords must match",
+        path: ["password"],
+      }
+    ),
   resolve({ input, ctx: { prisma } }) {
     const { email, password: unhashedPassword, name } = input;
     const password = bcrypt.hashSync(unhashedPassword, 10);

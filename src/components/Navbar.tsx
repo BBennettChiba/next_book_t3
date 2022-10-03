@@ -33,14 +33,14 @@ export const Navbar: FC<Props> = ({ children }) => {
           </Link>
         )}
         {!session?.data?.user && (
-          <Link href='/signin'>
+          <Link href="/signin">
             <a className="ml-3" onClick={() => signIn()}>
               signin
             </a>
           </Link>
         )}
         {session?.data?.user && (
-          <a className="ml-3" onClick={handleLogout}>
+          <a className="ml-3" onClick={handleLogout} href="#">
             logout
           </a>
         )}

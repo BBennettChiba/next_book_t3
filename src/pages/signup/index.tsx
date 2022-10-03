@@ -2,7 +2,7 @@ import { useState } from "react";
 import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
 import { useRouter } from "next/router";
 import { trpc } from "../../utils/trpc";
-import { string } from "zod";
+import { signIn } from "next-auth/react";
 
 type Keys = "name" | "password" | "confirmPassword" | "email" | "confirmEmail";
 
@@ -13,6 +13,7 @@ type Errors = {
 };
 
 export default function Login() {
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState<UserInfo>({
     name: "",
     password: "",
@@ -44,16 +45,30 @@ export default function Login() {
           return newErrors;
         });
         createUserMutation.reset();
+        return;
       }
       if (error?.data?.prismaError) {
-        console.log(error.data.prismaError);
+        const { field, message } = error.data.prismaError;
+        setErrors((e) => {
+          let newErrors = { ...e };
+          newErrors[`${field}Error`] = [message];
+          return newErrors;
+        });
       }
-      /**@TODO get these erros gone. get visual client errors for unique fields problems, on success push to home */
+    },
+    onSuccess: async () => {
+      const val = await signIn("credentials", {
+        ...userInfo,
+        callbackUrl: "/",
+        redirect: false,
+      });
+      if (val?.error) {
+        console.log("error ", val.error);
+        // setError(true);
+      }
+      router.push("/");
     },
   });
-
-  console.log(createUserMutation.error?.message);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

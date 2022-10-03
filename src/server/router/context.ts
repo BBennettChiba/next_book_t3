@@ -1,4 +1,5 @@
 // src/server/router/context.ts
+import { User } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
@@ -7,6 +8,8 @@ import { ZodError } from "zod";
 
 import { authOptions as nextAuthOptions } from "../../pages/api/auth/[...nextauth]";
 import { prisma } from "../db/client";
+
+type Fields = "name" | "email";
 
 export const createContext = async (
   opts?: trpcNext.CreateNextContextOptions
@@ -33,12 +36,17 @@ export const createRouter = () =>
       error.cause instanceof PrismaClientKnownRequestError &&
       error.cause.code === "P2002"
     ) {
+      const target = (error.cause.meta?.target as [Fields])[0];
+
       return {
         ...shape,
         data: {
           ...shape.data,
-          prismaError: "problem",
-          zodError: null
+          prismaError: {
+            message: `A user with that ${target} already exists`,
+            field: target,
+          },
+          zodError: null,
         },
       };
     }
@@ -46,6 +54,7 @@ export const createRouter = () =>
       ...shape,
       data: {
         ...shape.data,
+        prismaError: null,
         zodError:
           error.code === "BAD_REQUEST" && error.cause instanceof ZodError
             ? error.cause.flatten()

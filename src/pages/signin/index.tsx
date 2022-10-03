@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { setErrorMap } from "zod";
+import { router } from "@trpc/server";
 
 export default function Login() {
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState({
     name: "",
     password: "",
@@ -22,12 +24,11 @@ export default function Login() {
     if (val?.error) {
       setError(true);
     }
+    router.push("/");
   };
 
   const input = "block border border-grey-light w-full p-3 rounded mb-4";
   const errorDiv = "absolute left-full top-0 w-full px-8";
-
-  /**@TODO on successful login push to home */
 
   return (
     <div className="bg-grey-lighter min-h-screen flex flex-col">
@@ -36,7 +37,7 @@ export default function Login() {
         className="container relative max-w-sm mx-auto flex flex-1 flex-col items-center justify-center px-2"
       >
         <div className="bg-white px-6 py-8 rounded shadow-md text-black w-full">
-          <h1 className="mb-8 text-3xl text-center">Sign up</h1>
+          <h1 className="mb-8 text-3xl text-center">Sign In</h1>
           <div className="relative">
             <input
               type="text"
@@ -89,3 +90,5 @@ export default function Login() {
     </div>
   );
 }
+
+//**@TODO find out why it loads twice on this page */
