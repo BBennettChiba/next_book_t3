@@ -27,7 +27,6 @@ export const getStaticProps = async (
   context: GetStaticPropsContext<Params>
 ) => {
   const { title, chapter } = context.params!;
-  console.log(context);
 
   const ssg = createSSGHelpers({
     router: appRouter,

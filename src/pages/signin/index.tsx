@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
-import { setErrorMap } from "zod";
-import { router } from "@trpc/server";
 
 export default function Login() {
   const router = useRouter();
@@ -23,6 +21,7 @@ export default function Login() {
     });
     if (val?.error) {
       setError(true);
+      return;
     }
     router.push("/");
   };
@@ -50,13 +49,6 @@ export default function Login() {
                 setUserInfo({ ...userInfo, name: e.target.value })
               }
             ></input>
-            {/* {errors.nameError && (
-              <div className={error}>
-                {errors.nameError.map((e) => (
-                  <div key={e}>{e}</div>
-                ))}
-              </div>
-            )} */}
           </div>
           <div className="relative">
             <input
@@ -70,13 +62,6 @@ export default function Login() {
                 setUserInfo({ ...userInfo, password: e.target.value })
               }
             ></input>
-            {/* {errors.passwordError && (
-              <div className={error}>
-                {errors.passwordError.map((e) => (
-                  <div key={e}>{e}</div>
-                ))}
-              </div>
-            )} */}
           </div>
 
           <button

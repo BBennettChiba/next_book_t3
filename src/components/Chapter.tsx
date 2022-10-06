@@ -16,6 +16,8 @@ typeof window !== undefined &&
   typeof document !== "undefined" &&
   require("rangy/lib/rangy-highlighter");
 
+const START_DATA = { startIndex: 0, endIndex: 0, startOffset: 0, endOffset: 0 };
+
 const Chapter = ({ title, chapter }: { title: string; chapter: string }) => {
   const commentQuery = trpc.useQuery(["comment.getBy", { title, chapter }]);
   const commentMutation = trpc.useMutation("comment.create");
@@ -26,16 +28,12 @@ const Chapter = ({ title, chapter }: { title: string; chapter: string }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const highlighter = useRef<Highlighter | null>(null);
   const ref = useRef() as React.MutableRefObject<HTMLDivElement>;
-  const [selectionData, setSelectionData] = useState<Selection>({
-    startIndex: 0,
-    endIndex: 0,
-    startOffset: 0,
-    endOffset: 0,
-  });
+  const [selectionData, setSelectionData] = useState<Selection>(START_DATA);
 
   function checkHighlight(event: React.MouseEvent<HTMLDivElement>) {
     if (ref.current && !ref.current.contains(event.target as Node)) {
       highlighter.current?.removeAllHighlights();
+      setSelectionData(START_DATA);
       return setIsCommonBoxOpen(false);
     }
     if (isCommentBoxOpen || window.getSelection()?.toString() === "") {

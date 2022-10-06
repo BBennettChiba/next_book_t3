@@ -21,7 +21,7 @@ export default function ParagraphWithComment({
     comments!.map(() => false)
   );
   /**@TODO fix muleitple paragraph layer problem*/
-  const layerdText = comments?.map((com, i) => {
+  const layeredText = comments?.map((com, i) => {
     const spansMultipleParagraphs = com.startIndex !== com.endIndex;
     if (spansMultipleParagraphs) {
       return createMultipleParagraphHighlight(com, i);
@@ -34,7 +34,7 @@ export default function ParagraphWithComment({
         key={com.id}
         id={id.toString()}
         className="absolute m-0"
-        style={{ zIndex: i * -1, color: "rgba(0, 0, 0, 0.5)" }}
+        style={{ zIndex: i * -1 - 1, color: "rgba(0, 0, 0, 0.5)" }}
       >
         {a}
         <span className={isHighlighted[i] ? "bg-yellow-200" : ""}>{b}</span>
@@ -70,7 +70,7 @@ export default function ParagraphWithComment({
         </div>
       ))}
       <div className="relative">
-        {layerdText}
+        {layeredText}
         <p className="opacity-1 m-0" id={id.toString()}>
           {text}
         </p>
